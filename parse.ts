@@ -36,46 +36,43 @@ export const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
   return recur.or(p);
 };
 
-// countExpr and conditional are mutually recursive - they can contain each other
-
-const expression: P.Parser<any> = P.lazy(() => {
-  const countExpr = P.seq(
-    P.string("Count"),
-    unwrapParens(P.alt(expression, clause)),
-    numOp,
-    number
-  ).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v }));
-
-  const conditionalExpr: P.Parser<any> = P.lazy(() => {
-    const ggg: P.Parser<any> = unwrapParens(
+const lang = P.createLanguage({
+  conditionalExpr: (r) => {
+    const conditionalChild: P.Parser<any> = unwrapParens(
       P.alt(
-        countExpr,
+        r.countExpr,
         clause,
-        conditionalExpr.wrap(P.string("("), P.string(")"))
+        r.conditionalExpr.wrap(P.string("("), P.string(")"))
       )
     );
 
-    // return P.seq(ggg, P.seq(condOp, ggg).atLeast(1)).map(([clause, conds]) => [
-    //   clause,
-    //   ...conds.flat(),
-    // ]);
-    return P.seq(ggg, condOp, conditionalExpr.or(ggg)).map(
-      ([lhs, op, rhs]) => ({ lhs, op, rhs })
-    );
-  });
+    return P.seq(
+      conditionalChild,
+      condOp,
+      r.conditionalExpr.or(conditionalChild)
+    ).map(([lhs, op, rhs]) => ({ lhs, op, rhs }));
+  },
 
-  return P.alt(
-    conditionalExpr,
-    unwrapParens(conditionalExpr),
-    unwrapParens(countExpr),
-    unwrapParens(clause)
-  );
+  countExpr: (r) =>
+    P.seq(
+      P.string("Count"),
+      unwrapParens(P.alt(r.expression, clause)),
+      numOp,
+      number
+    ).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v })),
+
+  expression: (r) => {
+    return P.alt(
+      r.conditionalExpr,
+      unwrapParens(r.conditionalExpr),
+      unwrapParens(r.countExpr),
+      unwrapParens(clause)
+    );
+  },
 });
 
-const filter = expression;
-
 export const parseFilter = (filterString: string) => {
-  const result = filter.parse(filterString);
+  const result = lang.expression.parse(filterString);
   if (!result.status) throw result;
   return result.value;
 };
