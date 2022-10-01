@@ -4,13 +4,11 @@ import { parseFilter } from "./parse";
 describe("parseFilter", () => {
   test("clause", () => {
     const input = `(((([City] is equal to "Dubuque"))))`;
-    const expected = [
-      {
-        op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
-      },
-    ];
+    const expected = {
+      op: "is equal to",
+      lhs: "City",
+      rhs: "Dubuque",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
@@ -84,13 +82,11 @@ describe("parseFilter", () => {
 
   test("not equal to", () => {
     const input = `(([City] is not equal to "Fennimore, WI"))`;
-    const expected = [
-      {
-        op: "is not equal to",
-        lhs: "City",
-        rhs: "Fennimore, WI",
-      },
-    ];
+    const expected = {
+      op: "is not equal to",
+      lhs: "City",
+      rhs: "Fennimore, WI",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
@@ -114,54 +110,46 @@ describe("parseFilter", () => {
 
   test("entry date", () => {
     const input = `(([EntryDate] is before #2022-09-01 12:00:00 AM#))`;
-    const expected = [
-      {
-        op: "is before",
-        lhs: "EntryDate",
-        rhs: "2022-09-01 12:00:00 AM",
-      },
-    ];
+    const expected = {
+      op: "is before",
+      lhs: "EntryDate",
+      rhs: "2022-09-01 12:00:00 AM",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("number", () => {
     const input = `(([cgConsequenceOfFailureScore] < 5.0))`;
-    const expected = [
-      {
-        op: "<",
-        lhs: "cgConsequenceOfFailureScore",
-        rhs: "5.0",
-      },
-    ];
+    const expected = {
+      op: "<",
+      lhs: "cgConsequenceOfFailureScore",
+      rhs: "5.0",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("count", () => {
     const input = `(((((Count(([cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy] is equal to "Brian")) > 0)))))`;
-    const expected = [
-      {
-        type: "Count",
-        clause: {
-          lhs: "cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy",
-          op: "is equal to",
-          rhs: "Brian",
-        },
-        op: ">",
-        rhs: "0",
+    const expected = {
+      type: "Count",
+      clause: {
+        lhs: "cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy",
+        op: "is equal to",
+        rhs: "Brian",
       },
-    ];
+      op: ">",
+      rhs: "0",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("unary", () => {
     const input = `(([cgInspections\\EnteredBy] is null))`;
-    const expected = [
-      {
-        lhs: "cgInspections\\EnteredBy",
-        op: "is null",
-        rhs: undefined,
-      },
-    ];
+    const expected = {
+      lhs: "cgInspections\\EnteredBy",
+      op: "is null",
+      rhs: undefined,
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 

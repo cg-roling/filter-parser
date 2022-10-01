@@ -38,17 +38,27 @@ const numClause = P.seq(
   number
 );
 
-export const parseFilter = (filterString: string) => {
-  const clause = unwrapParens(
-    P.alt(stringClause, dateClause, numClause, unaryClause).map(
-      ([lhs, op, rhs]) => ({
-        lhs,
-        op,
-        rhs,
-      })
-    )
-  );
+const condOp = P.alt(
+  P.string("AND").trim(P.optWhitespace),
+  P.string("OR").trim(P.optWhitespace)
+);
 
+// UTILS
+const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
+  const unwrapRecur = P.lazy(() =>
+    P.string("(").then(unwrapRecur.or(p)).skip(P.string(")"))
+  );
+  return unwrapRecur;
+};
+
+const clause = P.alt(stringClause, dateClause, numClause, unaryClause).map(
+  ([lhs, op, rhs]) => ({
+    lhs,
+    op,
+    rhs,
+  })
+);
+export const parseFilter = (filterString: string) => {
   const group: P.Parser<any> = P.lazy(() => {
     const countExpr = unwrapParens(
       P.seq(
@@ -64,20 +74,12 @@ export const parseFilter = (filterString: string) => {
       }))
     );
 
-    return countExpr.or(clause);
+    return countExpr.or(unwrapParens(clause));
   });
 
-  const condOp = P.alt(
-    P.string("AND").trim(P.optWhitespace),
-    P.string("OR").trim(P.optWhitespace)
+  const conditional = P.seq(group, P.seq(condOp, group).atLeast(1)).map(
+    ([clause, conds]) => [clause, ...conds.flat()]
   );
-
-  const cond = P.seq(condOp, group);
-
-  const conditional = P.seq(group, cond.many()).map(([clause, conds]) => [
-    clause,
-    ...conds.flat(),
-  ]);
 
   const filter = P.alt(conditional, group);
 
@@ -87,11 +89,4 @@ export const parseFilter = (filterString: string) => {
   } else {
     throw result;
   }
-};
-
-const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
-  const unwrapRecur = P.lazy(() =>
-    P.string("(").then(unwrapRecur.or(p)).skip(P.string(")"))
-  );
-  return unwrapRecur;
 };
