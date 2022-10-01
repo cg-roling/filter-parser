@@ -46,7 +46,7 @@ const expression: P.Parser<any> = P.lazy(() => {
     number
   ).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v }));
 
-  const conditionalExpr = P.lazy(() => {
+  const conditionalExpr: P.Parser<any> = P.lazy(() => {
     const ggg: P.Parser<any> = unwrapParens(
       P.alt(
         countExpr,
@@ -55,10 +55,13 @@ const expression: P.Parser<any> = P.lazy(() => {
       )
     );
 
-    return P.seq(ggg, P.seq(condOp, ggg).atLeast(1)).map(([clause, conds]) => [
-      clause,
-      ...conds.flat(),
-    ]);
+    // return P.seq(ggg, P.seq(condOp, ggg).atLeast(1)).map(([clause, conds]) => [
+    //   clause,
+    //   ...conds.flat(),
+    // ]);
+    return P.seq(ggg, condOp, conditionalExpr.or(ggg)).map(
+      ([lhs, op, rhs]) => ({ lhs, op, rhs })
+    );
   });
 
   return P.alt(

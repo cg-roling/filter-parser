@@ -1,8 +1,28 @@
 import * as P from "parsimmon";
 import { parseFilter, unwrapParens } from "./parse";
 
+const x = P.string("x");
+const or = P.string("|");
+const zzz = P.lazy(() => {
+  return P.seq(x, or, zzz.or(x));
+});
+
 // (([City] is equal to "Dubuque"))
 describe("parseFilter", () => {
+  test("zzz", () => {
+    expect(zzz.parse("x|x")).toStrictEqual({
+      status: true,
+      value: ["x", "|", "x"],
+    });
+  });
+
+  test("zzz", () => {
+    expect(zzz.parse("x|x|x")).toStrictEqual({
+      status: true,
+      value: ["x", "|", ["x", "|", "x"]],
+    });
+  });
+
   test("clause", () => {
     const input = `(((([City] is equal to "Dubuque"))))`;
     const expected = {
@@ -15,114 +35,115 @@ describe("parseFilter", () => {
 
   test("clause or", () => {
     const input = `(([City] is equal to "Dubuque")) OR (([City] is equal to "Chicago"))`;
-    const expected = [
-      {
+    const expected = {
+      op: "OR",
+      lhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Dubuque",
       },
-      "OR",
-      {
+      rhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Chicago",
       },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("wrapped clause or", () => {
     const input = `((([City] is equal to "Dubuque")) OR (([City] is equal to "Chicago")))`;
-    const expected = [
-      {
+    const expected = {
+      op: "OR",
+      lhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Dubuque",
       },
-      "OR",
-      {
+      rhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Chicago",
       },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("clause or or", () => {
     const input = `(([City] is equal to "Dubuque")) OR (([City] is equal to "Chicago")) OR (([City] is equal to "New York"))`;
-    const expected = [
-      {
+    const expected = {
+      op: "OR",
+      lhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Dubuque",
       },
-      "OR",
-      {
-        op: "is equal to",
-        lhs: "City",
-        rhs: "Chicago",
+      rhs: {
+        op: "OR",
+        lhs: {
+          op: "is equal to",
+          lhs: "City",
+          rhs: "Chicago",
+        },
+        rhs: {
+          op: "is equal to",
+          lhs: "City",
+          rhs: "New York",
+        },
       },
-      "OR",
-      {
-        op: "is equal to",
-        lhs: "City",
-        rhs: "New York",
-      },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("nested or", () => {
     const input = `(([City] is equal to "Akron")) OR ((([City] is equal to "Aubrey")) OR (([City] is equal to "Dubuque")))`;
-    const expected = [
-      {
+    const expected = {
+      op: "OR",
+      lhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Akron",
       },
-      "OR",
-      [
-        {
+      rhs: {
+        op: "OR",
+        lhs: {
           op: "is equal to",
           lhs: "City",
           rhs: "Aubrey",
         },
-        "OR",
-        {
+        rhs: {
           op: "is equal to",
           lhs: "City",
           rhs: "Dubuque",
         },
-      ],
-    ];
+      },
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
   test("left nested or", () => {
     const input = `((([City] is equal to "Akron")) OR (([City] is equal to "Aubrey"))) OR (([City] is equal to "Dubuque"))`;
-    const expected = [
-      [
-        {
+    const expected = {
+      op: "OR",
+      lhs: {
+        op: "OR",
+        lhs: {
           op: "is equal to",
           lhs: "City",
           rhs: "Akron",
         },
-        "OR",
-
-        {
+        rhs: {
           op: "is equal to",
           lhs: "City",
           rhs: "Aubrey",
         },
-      ],
-      "OR",
-      {
+      },
+      rhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Dubuque",
       },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
@@ -138,19 +159,19 @@ describe("parseFilter", () => {
 
   test("not equal to and", () => {
     const input = `(([City] is not equal to "Fennimore, WI")) AND (([City] is not equal to "Chicago"))`;
-    const expected = [
-      {
+    const expected = {
+      op: "AND",
+      lhs: {
         op: "is not equal to",
         lhs: "City",
         rhs: "Fennimore, WI",
       },
-      "AND",
-      {
+      rhs: {
         op: "is not equal to",
         lhs: "City",
         rhs: "Chicago",
       },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
@@ -201,8 +222,9 @@ describe("parseFilter", () => {
 
   test("count or", () => {
     const input = `(Count(([cgInspections\\EnteredBy] is null)) > 0) OR (([City] is equal to "Dubuque"))`;
-    const expected = [
-      {
+    const expected = {
+      op: "OR",
+      lhs: {
         type: "Count",
         clause: {
           lhs: "cgInspections\\EnteredBy",
@@ -212,19 +234,35 @@ describe("parseFilter", () => {
         op: ">",
         rhs: "0",
       },
-      "OR",
-      {
+      rhs: {
         op: "is equal to",
         lhs: "City",
         rhs: "Dubuque",
       },
-    ];
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test.skip("conditional count", () => {
-    const input = `(Count(([cgAttachments\EnteredBy] is null) OR ([cgAttachments\EntryDate] is null)) > 0)`;
-    const expected = {};
+  test("conditional count", () => {
+    const input = `(Count(([cgAttachments\\EnteredBy] is null) OR ([cgAttachments\\EntryDate] is null)) > 0)`;
+    const expected = {
+      type: "Count",
+      clause: {
+        op: "OR",
+        lhs: {
+          lhs: "cgAttachments\\EnteredBy",
+          op: "is null",
+          rhs: undefined,
+        },
+        rhs: {
+          lhs: "cgAttachments\\EntryDate",
+          op: "is null",
+          rhs: undefined,
+        },
+      },
+      op: ">",
+      rhs: "0",
+    };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
