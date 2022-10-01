@@ -1,5 +1,5 @@
 import * as P from "parsimmon";
-import { parseFilter, unwrapParens } from "./parse";
+import { parseFilter, optParens } from "./parse";
 
 const x = P.string("x");
 const or = P.string("|");
@@ -199,7 +199,7 @@ describe("parseFilter", () => {
     const input = `(((((Count(([cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy] is equal to "Brian")) > 0)))))`;
     const expected = {
       type: "Count",
-      clause: {
+      lhs: {
         lhs: "cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy",
         op: "is equal to",
         rhs: "Brian",
@@ -226,7 +226,7 @@ describe("parseFilter", () => {
       op: "OR",
       lhs: {
         type: "Count",
-        clause: {
+        lhs: {
           lhs: "cgInspections\\EnteredBy",
           op: "is null",
           rhs: undefined,
@@ -247,7 +247,7 @@ describe("parseFilter", () => {
     const input = `(Count(([cgAttachments\\EnteredBy] is null) OR ([cgAttachments\\EntryDate] is null)) > 0)`;
     const expected = {
       type: "Count",
-      clause: {
+      lhs: {
         op: "OR",
         lhs: {
           lhs: "cgAttachments\\EnteredBy",
@@ -266,17 +266,17 @@ describe("parseFilter", () => {
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test("unwrapParens", () => {
-    const input = `(x)`;
-    const expected = "x";
-    const parser = unwrapParens(P.string("x"));
-    expect(parser.parse(input)["value"]).toStrictEqual(expected);
-  });
-
-  test("unwrapParens", () => {
-    const input = `x`;
-    const expected = "x";
-    const parser = unwrapParens(P.string("x"));
-    expect(parser.parse(input)["value"]).toStrictEqual(expected);
-  });
+  // test("unwrapParens", () => {
+  //   const input = `(x)`;
+  //   const expected = "x";
+  //   const parser = unwrapOptParens(P.string("x"));
+  //   expect(parser.parse(input)["value"]).toStrictEqual(expected);
+  // });
+  //
+  // test("unwrapParens", () => {
+  //   const input = `x`;
+  //   const expected = "x";
+  //   const parser = unwrapOptParens(P.string("x"));
+  //   expect(parser.parse(input)["value"]).toStrictEqual(expected);
+  // });
 });
