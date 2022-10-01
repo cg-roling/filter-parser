@@ -58,31 +58,32 @@ const clause = P.alt(stringClause, dateClause, numClause, unaryClause).map(
     rhs,
   })
 );
+const countExpr = unwrapParens(
+  P.seq(
+    P.string("Count"),
+    unwrapParens(clause).skip(P.whitespace),
+    numOp.skip(P.whitespace),
+    number
+  ).map(([_, c, o, v]) => ({
+    type: "Count",
+    clause: c,
+    op: o,
+    rhs: v,
+  }))
+);
+
+const group: P.Parser<any> = countExpr.or(unwrapParens(clause));
+
+const conditional = P.lazy(() => {
+  return P.seq(
+    P.alt(group, unwrapParens(conditional)),
+    P.seq(condOp, P.alt(group, unwrapParens(conditional))).atLeast(1)
+  ).map(([clause, conds]) => [clause, ...conds.flat()]);
+});
+
+const filter = P.alt(conditional, group);
+
 export const parseFilter = (filterString: string) => {
-  const group: P.Parser<any> = P.lazy(() => {
-    const countExpr = unwrapParens(
-      P.seq(
-        P.string("Count"),
-        group.skip(P.whitespace),
-        numOp.skip(P.whitespace),
-        number
-      ).map(([_, c, o, v]) => ({
-        type: "Count",
-        clause: c,
-        op: o,
-        rhs: v,
-      }))
-    );
-
-    return countExpr.or(unwrapParens(clause));
-  });
-
-  const conditional = P.seq(group, P.seq(condOp, group).atLeast(1)).map(
-    ([clause, conds]) => [clause, ...conds.flat()]
-  );
-
-  const filter = P.alt(conditional, group);
-
   const result = filter.parse(filterString);
   if (result.status) {
     return result.value;

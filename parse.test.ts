@@ -54,7 +54,7 @@ describe("parseFilter", () => {
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test.skip("nested or", () => {
+  test("nested or", () => {
     const input = `(([City] is equal to "Akron")) OR ((([City] is equal to "Aubrey")) OR (([City] is equal to "Dubuque")))`;
     const expected = [
       {
@@ -76,6 +76,33 @@ describe("parseFilter", () => {
           rhs: "Dubuque",
         },
       ],
+    ];
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
+
+  test("left nested or", () => {
+    const input = `((([City] is equal to "Akron")) OR (([City] is equal to "Aubrey"))) OR (([City] is equal to "Dubuque"))`;
+    const expected = [
+      [
+        {
+          op: "is equal to",
+          lhs: "City",
+          rhs: "Akron",
+        },
+        "OR",
+
+        {
+          op: "is equal to",
+          lhs: "City",
+          rhs: "Aubrey",
+        },
+      ],
+      "OR",
+      {
+        op: "is equal to",
+        lhs: "City",
+        rhs: "Dubuque",
+      },
     ];
     expect(parseFilter(input)).toStrictEqual(expected);
   });
