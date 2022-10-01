@@ -29,28 +29,30 @@ const clause = P.alt(unaryClause, binaryClause, numClause, dateClause).map(
 );
 
 // UTILS
-const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
+export const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
   const recur = P.lazy(() =>
-    P.string("(").then(recur.or(p)).skip(P.string(")"))
+    P.string("(").then(P.alt(recur, p)).skip(P.string(")"))
   );
-  return recur;
+  return recur.or(p);
 };
 
 // countExpr and conditional are mutually recursive - they can contain each other
 
-const countOrConditional: P.Parser<any> = P.lazy(() => {
+const expression: P.Parser<any> = P.lazy(() => {
   const countExpr = P.seq(
     P.string("Count"),
-    P.alt(countOrConditional, unwrapParens(clause)),
+    unwrapParens(P.alt(expression, clause)),
     numOp,
     number
   ).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v }));
 
-  const conditional = P.lazy(() => {
-    const ggg: P.Parser<any> = P.alt(
-      unwrapParens(countExpr),
-      unwrapParens(clause),
-      unwrapParens(conditional)
+  const conditionalExpr = P.lazy(() => {
+    const ggg: P.Parser<any> = unwrapParens(
+      P.alt(
+        countExpr,
+        clause,
+        conditionalExpr.wrap(P.string("("), P.string(")"))
+      )
     );
 
     return P.seq(ggg, P.seq(condOp, ggg).atLeast(1)).map(([clause, conds]) => [
@@ -59,10 +61,15 @@ const countOrConditional: P.Parser<any> = P.lazy(() => {
     ]);
   });
 
-  return conditional.or(unwrapParens(countExpr));
+  return P.alt(
+    conditionalExpr,
+    unwrapParens(conditionalExpr),
+    unwrapParens(countExpr),
+    unwrapParens(clause)
+  );
 });
 
-const filter = P.alt(countOrConditional, unwrapParens(clause));
+const filter = expression;
 
 export const parseFilter = (filterString: string) => {
   const result = filter.parse(filterString);
