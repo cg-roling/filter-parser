@@ -202,4 +202,10 @@ describe("parseFilter", () => {
     ];
     expect(parseFilter(input)).toStrictEqual(expected);
   });
+
+  test("conditional count", () => {
+    const input = `(Count(([cgAttachments\EnteredBy] is null) OR ([cgAttachments\EntryDate] is null)) > 0)`;
+    const expected = {};
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
 });

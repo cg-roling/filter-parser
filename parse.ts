@@ -8,8 +8,7 @@ const oneOfString = (strs: string[]) =>
 const number = P.regexp(/[0-9.]+/); // TODO probably too simple
 const text = P.regexp(/[a-z ,A-Z0-9\\\._:-]*/); // TODO probably too simple
 
-// Operator definitions
-// Operators include any whitespace around them
+// Operator definitions include any whitespace around them
 const unaryOp = oneOfString(["is null"]);
 const binaryOp = oneOfString(["is equal to", "is not equal to"]);
 const numOp = oneOfString(["<", ">"]);
@@ -37,29 +36,36 @@ const unwrapParens = <T>(p: P.Parser<T>): P.Parser<T> => {
   return recur;
 };
 
-const countExpr = P.seq(
-  P.string("Count"),
-  unwrapParens(clause),
-  numOp,
-  number
-).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v }));
+// countExpr and conditional are mutually recursive - they can contain each other
 
-const group = unwrapParens(P.alt(countExpr, clause));
+const countOrConditional: P.Parser<any> = P.lazy(() => {
+  const countExpr = P.seq(
+    P.string("Count"),
+    P.alt(countOrConditional, unwrapParens(clause)),
+    numOp,
+    number
+  ).map(([_, c, o, v]) => ({ type: "Count", clause: c, op: o, rhs: v }));
 
-const conditional = P.lazy(() => {
-  return P.seq(
-    P.alt(group, unwrapParens(conditional)),
-    P.seq(condOp, P.alt(group, unwrapParens(conditional))).atLeast(1)
-  ).map(([clause, conds]) => [clause, ...conds.flat()]);
+  const conditional = P.lazy(() => {
+    const ggg: P.Parser<any> = P.alt(
+      unwrapParens(countExpr),
+      unwrapParens(clause),
+      unwrapParens(conditional)
+    );
+
+    return P.seq(ggg, P.seq(condOp, ggg).atLeast(1)).map(([clause, conds]) => [
+      clause,
+      ...conds.flat(),
+    ]);
+  });
+
+  return conditional.or(unwrapParens(countExpr));
 });
 
-const filter = P.alt(conditional, group);
+const filter = P.alt(countOrConditional, unwrapParens(clause));
 
 export const parseFilter = (filterString: string) => {
   const result = filter.parse(filterString);
-  if (result.status) {
-    return result.value;
-  } else {
-    throw result;
-  }
+  if (!result.status) throw result;
+  return result.value;
 };
