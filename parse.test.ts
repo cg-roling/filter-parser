@@ -1,4 +1,4 @@
-import { parseFilter } from "./parse";
+import { iDateCompare, parseFilter } from "./parse";
 
 // (([City] is equal to "Dubuque"))
 describe("parseFilter", () => {
@@ -198,6 +198,17 @@ describe("parseFilter", () => {
       op: "is not today",
       lhs: "EntryDate",
       rhs: undefined,
+    };
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
+
+  test.only("is not within the last 5 days", () => {
+    const input = `(([EntryDate] is not within the last 5 days))`;
+    const expected = {
+      type: "Compare",
+      op: "is not within the last [] days",
+      lhs: "EntryDate",
+      rhs: "5",
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
