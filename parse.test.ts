@@ -1,28 +1,7 @@
-import * as P from "parsimmon";
-import { parseFilter, optParens } from "./parse";
-
-const x = P.string("x");
-const or = P.string("|");
-const zzz = P.lazy(() => {
-  return P.seq(x, or, zzz.or(x));
-});
+import { parseFilter } from "./parse";
 
 // (([City] is equal to "Dubuque"))
 describe("parseFilter", () => {
-  test("zzz", () => {
-    expect(zzz.parse("x|x")).toStrictEqual({
-      status: true,
-      value: ["x", "|", "x"],
-    });
-  });
-
-  test("zzz", () => {
-    expect(zzz.parse("x|x|x")).toStrictEqual({
-      status: true,
-      value: ["x", "|", ["x", "|", "x"]],
-    });
-  });
-
   test("clause", () => {
     const input = `(((([City] is equal to "Dubuque"))))`;
     const expected = {

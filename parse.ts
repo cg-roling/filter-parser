@@ -1,5 +1,11 @@
 import P from "parsimmon";
 
+interface Compare {
+  op: string;
+  lhs: any;
+  rhs: any;
+}
+
 // An operator, discarding leading/trailing whitespace
 const operator = (strs: string[]) =>
   P.alt(...strs.map(P.string)).trim(P.optWhitespace);
@@ -36,13 +42,12 @@ const binaryCompare = P.seq(field, binaryOp, quoted);
 const numCompare = P.seq(field, numOp, number);
 const dateCompare = P.seq(field, dateOp, date);
 
-const lang = P.createLanguage({
-  expression: (r) => optParens(P.alt(r.andOr, r.count, r.compare)),
+const compare = P.alt(unaryCompare, binaryCompare, numCompare, dateCompare).map(
+  ([lhs, op, rhs]) => ({ lhs, op, rhs })
+);
 
-  compare: (r) =>
-    P.alt(unaryCompare, binaryCompare, numCompare, dateCompare).map(
-      ([lhs, op, rhs]) => ({ lhs, op, rhs })
-    ),
+const lang = P.createLanguage({
+  expression: (r) => optParens(P.alt(r.andOr, r.count, compare)),
 
   count: (r) =>
     P.string("Count")
