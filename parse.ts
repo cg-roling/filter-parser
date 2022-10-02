@@ -115,7 +115,7 @@ const date = text.wrap(P.string("#"), P.string("#"));
 const unaryOp = operator(unary);
 const binaryOp = operator(["is equal to", "is not equal to"]);
 const integerDateOp = iDateOperator(integerDate);
-const numOp = operator(["<", ">"]);
+const numOp = operator(["=", "<>", "<", ">", "<=", ">="]);
 const dateOp = operator(["is before"]);
 const condOp = operator(["AND", "OR"]);
 
