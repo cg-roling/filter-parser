@@ -1,4 +1,4 @@
-import * as P from "parsimmon";
+import P from "parsimmon";
 
 // An operator, discarding leading/trailing whitespace
 const operator = (strs: string[]) =>
@@ -9,7 +9,7 @@ const paren = <T>(p: P.Parser<T>) => P.string("(").then(p).skip(P.string(")"));
 
 // A parser wrapped in any number of layers of parens.
 export const parens = <T>(p: P.Parser<T>): P.Parser<T> => {
-  const recur = P.lazy(() => paren(p).or(paren(recur)));
+  const recur: P.Parser<any> = P.lazy(() => paren(p).or(paren(recur)));
   return recur;
 };
 
