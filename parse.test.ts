@@ -244,18 +244,4 @@ describe("parseFilter", () => {
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
-
-  // test("unwrapParens", () => {
-  //   const input = `(x)`;
-  //   const expected = "x";
-  //   const parser = unwrapOptParens(P.string("x"));
-  //   expect(parser.parse(input)["value"]).toStrictEqual(expected);
-  // });
-  //
-  // test("unwrapParens", () => {
-  //   const input = `x`;
-  //   const expected = "x";
-  //   const parser = unwrapOptParens(P.string("x"));
-  //   expect(parser.parse(input)["value"]).toStrictEqual(expected);
-  // });
 });

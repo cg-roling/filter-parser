@@ -1,32 +1,110 @@
-export default function Index() {
+import { useState } from "react";
+import { AndOr, Compare, Count, parseFilter } from "../../parse";
+
+function ExprView(props: { expr: Compare | Count | AndOr }) {
+  const { expr } = props;
+  if (expr.type === "Compare") return <CompareView expr={expr} />;
+  if (expr.type === "Count") return <CountView expr={expr} />;
+  if (expr.type === "AndOr") return <AndOrView expr={expr} />;
+  return <span>💣</span>;
+}
+
+function CompareView(props: { expr: Compare }) {
+  const { expr } = props;
   return (
-    <div style={{ fontFamily: "system-ui, sans-serif", lineHeight: "1.4" }}>
-      <h1>Welcome to Remix</h1>
-      <ul>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/blog"
-            rel="noreferrer"
-          >
-            15m Quickstart Blog Tutorial
-          </a>
-        </li>
-        <li>
-          <a
-            target="_blank"
-            href="https://remix.run/tutorials/jokes"
-            rel="noreferrer"
-          >
-            Deep Dive Jokes App Tutorial
-          </a>
-        </li>
-        <li>
-          <a target="_blank" href="https://remix.run/docs" rel="noreferrer">
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div
+      style={{
+        padding: "1em",
+        position: "relative",
+        background: "pink",
+        margin: "1em",
+      }}
+    >
+      <Label>COMPARE</Label>[{expr.lhs}] {expr.op} "{expr.rhs}"
     </div>
   );
+}
+
+function CountView(props: { expr: Count }) {
+  const { expr } = props;
+  return (
+    <div
+      style={{
+        position: "relative",
+        background: "deepskyblue",
+        padding: "1em",
+        margin: "1em",
+      }}
+    >
+      <Label>Count</Label>
+      Count (<ExprView expr={expr.lhs} />) {expr.op} "{expr.rhs}")
+    </div>
+  );
+}
+
+function AndOrView(props: { expr: AndOr }) {
+  const { expr } = props;
+  return (
+    <div
+      style={{
+        position: "relative",
+        background: "orange",
+        padding: "1em",
+        margin: "1em",
+      }}
+    >
+      <Label>AND/OR</Label>
+      (<ExprView expr={expr.lhs} />) {expr.op} (<ExprView expr={expr.rhs} />)
+    </div>
+  );
+}
+
+function Label(props: any) {
+  return (
+    <div
+      style={{
+        fontSize: "75%",
+        background: "#eee",
+        position: "absolute",
+        top: 0,
+        left: 0,
+      }}
+    >
+      {props.children}
+    </div>
+  );
+}
+
+export default function Index() {
+  const [exampleFilter, setExampleFilter] = useState(
+    `(Count(([cgAttachments\\EnteredBy] is null) OR ([cgAttachments\\EntryDate] is null)) > 0)`
+  );
+  const onChange = (evt: any) => setExampleFilter(evt.target.value);
+  const parsed = parse(exampleFilter);
+  console.log(parsed);
+
+  return (
+    <div>
+      <h1>Input</h1>
+      <textarea
+        style={{ width: "100%", height: "4em" }}
+        onChange={onChange}
+        value={exampleFilter}
+      ></textarea>
+      <h1>Visualizer</h1>
+      <div>
+        <ExprView expr={parsed} />
+      </div>
+      <h1>JSON Output</h1>
+      <pre>{JSON.stringify(parsed, null, 4)}</pre>
+    </div>
+  );
+}
+
+function parse(filter: string) {
+  try {
+    return parseFilter(filter);
+  } catch {
+    return "";
+  }
 }

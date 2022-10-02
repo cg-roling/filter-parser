@@ -1,8 +1,23 @@
 import P from "parsimmon";
 
-interface Compare {
+export interface Compare {
+  type: "Compare";
   op: string;
   lhs: any;
+  rhs: any;
+}
+
+export interface Count {
+  type: "Count";
+  lhs: Compare;
+  op: string;
+  rhs: any;
+}
+
+export interface AndOr {
+  type: "AndOr";
+  lhs: any;
+  op: string;
   rhs: any;
 }
 
@@ -42,9 +57,12 @@ const binaryCompare = P.seq(field, binaryOp, quoted);
 const numCompare = P.seq(field, numOp, number);
 const dateCompare = P.seq(field, dateOp, date);
 
-const compare = P.alt(unaryCompare, binaryCompare, numCompare, dateCompare).map(
-  ([lhs, op, rhs]) => ({ lhs, op, rhs })
-);
+const compare: P.Parser<Compare> = P.alt(
+  unaryCompare,
+  binaryCompare,
+  numCompare,
+  dateCompare
+).map(([lhs, op, rhs]) => ({ type: "Compare", lhs, op, rhs }));
 
 const lang = P.createLanguage({
   expression: (r) => optParens(P.alt(r.andOr, r.count, compare)),
@@ -56,6 +74,7 @@ const lang = P.createLanguage({
 
   andOr: (r) =>
     P.seq(parens(r.expression), condOp, r.expression).map(([lhs, op, rhs]) => ({
+      type: "AndOr",
       lhs,
       op,
       rhs,
