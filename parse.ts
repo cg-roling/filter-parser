@@ -1,5 +1,32 @@
 import P from "parsimmon";
 
+const unary = [
+  "is null",
+  "is not null",
+  "is equal to null",
+  "is not equal to null",
+  "is now ",
+  "is today",
+  "before today",
+  "after today",
+  "through today",
+  "from today ",
+  "is not today",
+  "is not now",
+  "was last week",
+  "was last month",
+  "was last quarter",
+  "was last year",
+  "is this week",
+  "is this month",
+  "is this quarter",
+  "is this year",
+  "is next week",
+  "is next month",
+  "is next quarter",
+  "is next year",
+];
+
 export interface Compare {
   type: "Compare";
   op: string;
@@ -45,7 +72,7 @@ const quoted = text.wrap(P.string('"'), P.string('"'));
 const date = text.wrap(P.string("#"), P.string("#"));
 
 // Operator definitions discard any whitespace around them
-const unaryOp = operator(["is null"]);
+const unaryOp = operator(unary);
 const binaryOp = operator(["is equal to", "is not equal to"]);
 const numOp = operator(["<", ">"]);
 const dateOp = operator(["is before"]);
