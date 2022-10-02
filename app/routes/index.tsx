@@ -20,7 +20,23 @@ function CompareView(props: { expr: Compare }) {
         margin: "1em",
       }}
     >
-      <Label>COMPARE</Label>[{expr.lhs}] {expr.op} "{expr.rhs}"
+      <Label>COMPARE</Label>
+      <table>
+        <thead>
+          <tr>
+            <th>Field</th>
+            <th>Operator</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td style={{ padding: " 0 1em" }}>[{expr.lhs}]</td>
+            <td style={{ padding: " 0 1em" }}>{expr.op}</td>
+            <td style={{ padding: " 0 1em" }}>"{expr.rhs}"</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -77,7 +93,7 @@ function Label(props: any) {
 
 export default function Index() {
   const [exampleFilter, setExampleFilter] = useState(
-    `(Count(([cgAttachments\\EnteredBy] is null) OR ([cgAttachments\\EntryDate] is null)) > 0)`
+    `(Count(([cgInspections\\EnteredBy] is not within the last 10 days)) > 0) OR (([City] is equal to "Dubuque"))`
   );
   const onChange = (evt: any) => setExampleFilter(evt.target.value);
   const parsed = parse(exampleFilter);
