@@ -14,6 +14,7 @@ function CompareView(props: { expr: Compare }) {
   return (
     <div
       style={{
+        border: "1px solid black",
         padding: "1em",
         position: "relative",
         background: "pink",
@@ -46,6 +47,7 @@ function CountView(props: { expr: Count }) {
   return (
     <div
       style={{
+        border: "1px solid black",
         position: "relative",
         background: "deepskyblue",
         padding: "1em",
@@ -63,6 +65,7 @@ function AndOrView(props: { expr: AndOr }) {
   return (
     <div
       style={{
+        border: "1px solid black",
         position: "relative",
         background: "orange",
         padding: "1em",
@@ -79,6 +82,8 @@ function Label(props: any) {
   return (
     <div
       style={{
+        borderBottom: "1px solid black",
+        borderRight: "1px solid black",
         fontSize: "75%",
         background: "#eee",
         position: "absolute",
