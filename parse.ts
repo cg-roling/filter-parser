@@ -27,30 +27,30 @@ const unary = [
   "is next year",
 ];
 
-const integerDate: [string, string][] = [
-  ["before", "months from now"],
-  ["after", "months from now"],
-  ["before", "hours from now"],
-  ["before", "years from now"],
-  ["before", "days from now"],
-  ["after", "hours from now"],
-  ["after", "years from now"],
-  ["after", "days from now"],
-  ["within the last", "months"],
-  ["within the next", "months"],
-  ["before", "months ago"],
-  ["within the last", "years"],
-  ["within the next", "years"],
-  ["before", "hours ago"],
-  ["after", "months ago"],
-  ["before", "years ago"],
-  ["within the last", "days"],
-  ["within the next", "days"],
-  ["after", "hours ago"],
-  ["after", "years ago"],
-  ["before", "days ago"],
-  ["after", "days ago"],
-];
+const integerDate = [
+  "before [] months from now",
+  "after [] months from now",
+  "before [] hours from now",
+  "before [] years from now",
+  "before [] days from now",
+  "after [] hours from now",
+  "after [] years from now",
+  "after [] days from now",
+  "within the last [] months",
+  "within the next [] months",
+  "before [] months ago",
+  "within the last [] years",
+  "within the next [] years",
+  "before [] hours ago",
+  "after [] months ago",
+  "before [] years ago",
+  "within the last [] days",
+  "within the next [] days",
+  "after [] hours ago",
+  "after [] years ago",
+  "before [] days ago",
+  "after [] days ago",
+].flatMap((x) => ["is " + x, "is not " + x]);
 
 export interface Compare {
   type: "Compare";
@@ -77,21 +77,6 @@ export interface AndOr {
 const operator = (strs: string[]) =>
   P.alt(...strs.map(P.string)).trim(P.optWhitespace);
 
-const iDateOperator = (ops: [string, string][]) =>
-  P.alt(
-    ...ops.map(([l, r]) =>
-      P.seq(
-        P.alt(P.string("is not"), P.string("is")).trim(P.optWhitespace),
-        P.string(l).trim(P.optWhitespace),
-        P.regexp(/[0-9]+/).trim(P.optWhitespace),
-        P.string(r)
-      ).map(([iz, l, rhs, r]) => {
-        const op = [iz, l, "[]", r].join(" ");
-        return [op, rhs];
-      })
-    )
-  );
-
 // A parser wrapped in a single layer of parens.
 const paren = <T>(p: P.Parser<T>) => P.string("(").then(p).skip(P.string(")"));
 
@@ -114,21 +99,21 @@ const date = text.wrap(P.string("#"), P.string("#"));
 // Operator definitions discard any whitespace around them
 const unaryOp = operator(unary);
 const binaryOp = operator(["is equal to", "is not equal to"]);
-const integerDateOp = iDateOperator(integerDate);
+const integerDateOp = operator(integerDate);
 const numOp = operator(["=", "<>", "<", ">", "<=", ">="]);
 const dateOp = operator(["is before"]);
 const condOp = operator(["AND", "OR"]);
 
 // Comparisons
 const unaryCompare = P.seq(field, unaryOp);
-export const iDateCompare = P.seq(field, integerDateOp);
+const integerDateCompare = P.seq(field, integerDateOp, number);
 const binaryCompare = P.seq(field, binaryOp, quoted);
 const numCompare = P.seq(field, numOp, number);
 const dateCompare = P.seq(field, dateOp, date);
 
 const compare: P.Parser<Compare> = P.alt(
   unaryCompare,
-  iDateCompare,
+  integerDateCompare,
   binaryCompare,
   numCompare,
   dateCompare
