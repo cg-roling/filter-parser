@@ -202,7 +202,7 @@ describe("parseFilter", () => {
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test.only("is not within the last 5 days", () => {
+  test("is not within the last 5 days", () => {
     const input = `(([EntryDate] is not within the last 5 days))`;
     const expected = {
       type: "Compare",
