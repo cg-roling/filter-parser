@@ -1,11 +1,21 @@
 import { useState } from "react";
 import { AndOr, Compare, Count, parseFilter } from "../../parse";
 
-function ExprView(props: { expr: Compare | Count | AndOr }) {
+function ValueView(props: { value: { type: string; value: string } }) {
+  return <span>{props.value.value}</span>;
+}
+
+function ExprView(props: { expr: Compare | Count | AndOr | any }) {
   const { expr } = props;
+  if (!expr) return <span>?</span>;
+  if (typeof expr === "string") return <span>{expr}</span>;
   if (expr.type === "Compare") return <CompareView expr={expr} />;
   if (expr.type === "Count") return <CountView expr={expr} />;
   if (expr.type === "AndOr") return <AndOrView expr={expr} />;
+  if (expr.type === "string") return <span>"{expr.value}"</span>;
+  if (expr.type === "date") return <span>#{expr.value}#</span>;
+  if (expr.type === "number") return <span>{expr.value}</span>;
+  if (expr.type === "field") return <span>[{expr.value}]</span>;
   return <span>💣</span>;
 }
 
@@ -24,8 +34,10 @@ function CompareView(props: { expr: Compare }) {
         </thead>
         <tbody>
           <tr>
-            {[lhs, rhs, op].map((x) => (
-              <td style={{ padding: " 0 1em" }}>{x}</td>
+            {[lhs, op, rhs].map((x) => (
+              <td style={{ padding: " 0 1em" }}>
+                <ExprView expr={x} />
+              </td>
             ))}
           </tr>
         </tbody>
@@ -38,7 +50,8 @@ function CountView(props: { expr: Count }) {
   const { lhs, op, rhs } = props.expr;
   return (
     <View color="deepskyblue" label="COUNT">
-      Count (<ExprView expr={lhs} />) {op} "{rhs}")
+      Count (<ExprView expr={lhs} />) {op} <ExprView expr={rhs} />
+      ")
     </View>
   );
 }
@@ -89,7 +102,7 @@ function Label(props: any) {
 
 export default function Index() {
   const [exampleFilter, setExampleFilter] = useState(
-    `(Count(([cgInspections\\EnteredBy] is not within the last 10 days)) > 0) OR (([City] is equal to "Dubuque"))`
+    `(Count(([cgInspections\\EntryDate] is not within the last [] days 10)) > 0) OR (([City] is equal to "Dubuque"))`
   );
   const onChange = (evt: any) => setExampleFilter(evt.target.value);
   const parsed = parse(exampleFilter);
