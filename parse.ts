@@ -107,9 +107,9 @@ const condOp = operator(["AND", "OR"]);
 // Comparisons
 const unaryCompare = P.seq(field, unaryOp);
 const integerDateCompare = P.seq(field, integerDateOp, number);
-const binaryCompare = P.seq(field, binaryOp, quoted);
-const numCompare = P.seq(field, numOp, number);
-const dateCompare = P.seq(field, dateOp, date);
+const binaryCompare = P.seq(field, binaryOp, P.alt(quoted, field));
+const numCompare = P.seq(field, numOp, P.alt(number, field));
+const dateCompare = P.seq(field, dateOp, P.alt(date, field));
 
 const compare: P.Parser<Compare> = P.alt(
   unaryCompare,

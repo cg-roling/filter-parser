@@ -2,13 +2,24 @@ import { parseFilter } from "./parse";
 
 // (([City] is equal to "Dubuque"))
 describe("parseFilter", () => {
-  test("clause", () => {
+  test("compare", () => {
     const input = `(((([City] is equal to "Dubuque"))))`;
     const expected = {
       type: "Compare",
       op: "is equal to",
       lhs: "City",
       rhs: "Dubuque",
+    };
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
+
+  test("compare to field", () => {
+    const input = `(((([City] is equal to [City]))))`;
+    const expected = {
+      type: "Compare",
+      op: "is equal to",
+      lhs: "City",
+      rhs: "City",
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -180,13 +191,24 @@ describe("parseFilter", () => {
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test("entry date", () => {
+  test("date compare", () => {
     const input = `(([EntryDate] is before #2022-09-01 12:00:00 AM#))`;
     const expected = {
       type: "Compare",
       op: "is before",
       lhs: "EntryDate",
       rhs: "2022-09-01 12:00:00 AM",
+    };
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
+
+  test("date compare to field", () => {
+    const input = `(([EntryDate] is before [EntryDate]))`;
+    const expected = {
+      type: "Compare",
+      op: "is before",
+      lhs: "EntryDate",
+      rhs: "EntryDate",
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -213,13 +235,24 @@ describe("parseFilter", () => {
     expect(parseFilter(input)).toStrictEqual(expected);
   });
 
-  test("number", () => {
+  test("compare number", () => {
     const input = `(([cgConsequenceOfFailureScore] < 5.0))`;
     const expected = {
       type: "Compare",
       op: "<",
       lhs: "cgConsequenceOfFailureScore",
       rhs: "5.0",
+    };
+    expect(parseFilter(input)).toStrictEqual(expected);
+  });
+
+  test("compare number to field", () => {
+    const input = `(([cgConsequenceOfFailureScore] < [cgConsequenceOfFailureScore]))`;
+    const expected = {
+      type: "Compare",
+      op: "<",
+      lhs: "cgConsequenceOfFailureScore",
+      rhs: "cgConsequenceOfFailureScore",
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
