@@ -90,11 +90,17 @@ export const parens = <T>(p: P.Parser<T>): P.Parser<T> => {
 export const optParens = <T>(p: P.Parser<T>): P.Parser<T> => p.or(parens(p));
 
 // Atoms
-const number = P.regexp(/[0-9.]+/); // TODO probably too simple
+const number = P.regexp(/[0-9.]+/).map((value) => ({ type: "number", value })); // TODO probably too simple
 const text = P.regexp(/[a-z ,A-Z0-9\\\._:-]*/); // TODO probably too simple
-const field = text.wrap(P.string("["), P.string("]"));
-const quoted = text.wrap(P.string('"'), P.string('"'));
-const date = text.wrap(P.string("#"), P.string("#"));
+const field = text
+  .wrap(P.string("["), P.string("]"))
+  .map((value) => ({ type: "field", value }));
+const quoted = text
+  .wrap(P.string('"'), P.string('"'))
+  .map((value) => ({ type: "string", value }));
+const date = text
+  .wrap(P.string("#"), P.string("#"))
+  .map((value) => ({ type: "date", value }));
 
 // Operator definitions discard any whitespace around them
 const unaryOp = operator(unary);

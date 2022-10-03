@@ -7,8 +7,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is equal to",
-      lhs: "City",
-      rhs: "Dubuque",
+      lhs: { type: "field", value: "City" },
+      rhs: { type: "string", value: "Dubuque" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -18,8 +18,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is equal to",
-      lhs: "City",
-      rhs: "City",
+      lhs: { type: "field", value: "City" },
+      rhs: { type: "field", value: "City" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -32,14 +32,14 @@ describe("parseFilter", () => {
       lhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Dubuque" },
       },
       rhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Chicago",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Chicago" },
       },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -53,14 +53,14 @@ describe("parseFilter", () => {
       lhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Dubuque" },
       },
       rhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Chicago",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Chicago" },
       },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -74,8 +74,8 @@ describe("parseFilter", () => {
       lhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Dubuque" },
       },
       rhs: {
         type: "AndOr",
@@ -83,14 +83,14 @@ describe("parseFilter", () => {
         lhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "Chicago",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "Chicago" },
         },
         rhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "New York",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "New York" },
         },
       },
     };
@@ -105,8 +105,8 @@ describe("parseFilter", () => {
       lhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Akron",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Akron" },
       },
       rhs: {
         type: "AndOr",
@@ -114,14 +114,14 @@ describe("parseFilter", () => {
         lhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "Aubrey",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "Aubrey" },
         },
         rhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "Dubuque",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "Dubuque" },
         },
       },
     };
@@ -139,21 +139,21 @@ describe("parseFilter", () => {
         lhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "Akron",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "Akron" },
         },
         rhs: {
           type: "Compare",
           op: "is equal to",
-          lhs: "City",
-          rhs: "Aubrey",
+          lhs: { type: "field", value: "City" },
+          rhs: { type: "string", value: "Aubrey" },
         },
       },
       rhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Dubuque" },
       },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -164,8 +164,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is not equal to",
-      lhs: "City",
-      rhs: "Fennimore, WI",
+      lhs: { type: "field", value: "City" },
+      rhs: { type: "string", value: "Fennimore, WI" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -178,14 +178,14 @@ describe("parseFilter", () => {
       lhs: {
         type: "Compare",
         op: "is not equal to",
-        lhs: "City",
-        rhs: "Fennimore, WI",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Fennimore, WI" },
       },
       rhs: {
         type: "Compare",
         op: "is not equal to",
-        lhs: "City",
-        rhs: "Chicago",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Chicago" },
       },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -196,8 +196,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is before",
-      lhs: "EntryDate",
-      rhs: "2022-09-01 12:00:00 AM",
+      lhs: { type: "field", value: "EntryDate" },
+      rhs: { type: "date", value: "2022-09-01 12:00:00 AM" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -207,8 +207,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is before",
-      lhs: "EntryDate",
-      rhs: "EntryDate",
+      lhs: { type: "field", value: "EntryDate" },
+      rhs: { type: "field", value: "EntryDate" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -218,7 +218,7 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is not today",
-      lhs: "EntryDate",
+      lhs: { type: "field", value: "EntryDate" },
       rhs: undefined,
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -229,8 +229,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "is not within the last [] days",
-      lhs: "EntryDate",
-      rhs: "5",
+      lhs: { type: "field", value: "EntryDate" },
+      rhs: { type: "number", value: "5" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -240,8 +240,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "<",
-      lhs: "cgConsequenceOfFailureScore",
-      rhs: "5.0",
+      lhs: { type: "field", value: "cgConsequenceOfFailureScore" },
+      rhs: { type: "number", value: "5.0" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -251,8 +251,8 @@ describe("parseFilter", () => {
     const expected = {
       type: "Compare",
       op: "<",
-      lhs: "cgConsequenceOfFailureScore",
-      rhs: "cgConsequenceOfFailureScore",
+      lhs: { type: "field", value: "cgConsequenceOfFailureScore" },
+      rhs: { type: "field", value: "cgConsequenceOfFailureScore" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -263,12 +263,16 @@ describe("parseFilter", () => {
       type: "Count",
       lhs: {
         type: "Compare",
-        lhs: "cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy",
+        lhs: {
+          type: "field",
+          value:
+            "cgInspections\\cgConditionCategories\\ConditionCategory\\cgImpacts\\Activity\\EnteredBy",
+        },
         op: "is equal to",
-        rhs: "Brian",
+        rhs: { type: "string", value: "Brian" },
       },
       op: ">",
-      rhs: "0",
+      rhs: { type: "number", value: "0" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
@@ -277,7 +281,7 @@ describe("parseFilter", () => {
     const input = `(([cgInspections\\EnteredBy] is null))`;
     const expected = {
       type: "Compare",
-      lhs: "cgInspections\\EnteredBy",
+      lhs: { type: "field", value: "cgInspections\\EnteredBy" },
       op: "is null",
       rhs: undefined,
     };
@@ -293,18 +297,18 @@ describe("parseFilter", () => {
         type: "Count",
         lhs: {
           type: "Compare",
-          lhs: "cgInspections\\EnteredBy",
+          lhs: { type: "field", value: "cgInspections\\EnteredBy" },
           op: "is null",
           rhs: undefined,
         },
         op: ">",
-        rhs: "0",
+        rhs: { type: "number", value: "0" },
       },
       rhs: {
         type: "Compare",
         op: "is equal to",
-        lhs: "City",
-        rhs: "Dubuque",
+        lhs: { type: "field", value: "City" },
+        rhs: { type: "string", value: "Dubuque" },
       },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
@@ -319,19 +323,19 @@ describe("parseFilter", () => {
         op: "OR",
         lhs: {
           type: "Compare",
-          lhs: "cgAttachments\\EnteredBy",
+          lhs: { type: "field", value: "cgAttachments\\EnteredBy" },
           op: "is null",
           rhs: undefined,
         },
         rhs: {
           type: "Compare",
-          lhs: "cgAttachments\\EntryDate",
+          lhs: { type: "field", value: "cgAttachments\\EntryDate" },
           op: "is null",
           rhs: undefined,
         },
       },
       op: ">",
-      rhs: "0",
+      rhs: { type: "number", value: "0" },
     };
     expect(parseFilter(input)).toStrictEqual(expected);
   });
