@@ -10,17 +10,9 @@ function ExprView(props: { expr: Compare | Count | AndOr }) {
 }
 
 function CompareView(props: { expr: Compare }) {
-  const { expr } = props;
+  const [{ lhs, rhs, op }] = [props.expr];
   return (
-    <div
-      style={{
-        border: "1px solid black",
-        padding: "1em",
-        position: "relative",
-        background: "pink",
-        margin: "1em",
-      }}
-    >
+    <View label="COMPARE" color="pink">
       <Label>COMPARE</Label>
       <table>
         <thead>
@@ -32,48 +24,47 @@ function CompareView(props: { expr: Compare }) {
         </thead>
         <tbody>
           <tr>
-            <td style={{ padding: " 0 1em" }}>[{expr.lhs}]</td>
-            <td style={{ padding: " 0 1em" }}>{expr.op}</td>
-            <td style={{ padding: " 0 1em" }}>"{expr.rhs}"</td>
+            {[lhs, rhs, op].map((x) => (
+              <td style={{ padding: " 0 1em" }}>{x}</td>
+            ))}
           </tr>
         </tbody>
       </table>
-    </div>
+    </View>
   );
 }
 
 function CountView(props: { expr: Count }) {
-  const { expr } = props;
+  const { lhs, op, rhs } = props.expr;
   return (
-    <div
-      style={{
-        border: "1px solid black",
-        position: "relative",
-        background: "deepskyblue",
-        padding: "1em",
-        margin: "1em",
-      }}
-    >
-      <Label>Count</Label>
-      Count (<ExprView expr={expr.lhs} />) {expr.op} "{expr.rhs}")
-    </div>
+    <View color="deepskyblue" label="COUNT">
+      Count (<ExprView expr={lhs} />) {op} "{rhs}")
+    </View>
   );
 }
 
 function AndOrView(props: { expr: AndOr }) {
-  const { expr } = props;
+  const { lhs, op, rhs } = props.expr;
+  return (
+    <View color="orange" label="AND/OR">
+      (<ExprView expr={lhs} />) {op} (<ExprView expr={rhs} />)
+    </View>
+  );
+}
+
+function View(props: { children: any; label: string; color: string }) {
   return (
     <div
       style={{
         border: "1px solid black",
         position: "relative",
-        background: "orange",
+        background: props.color,
         padding: "1em",
         margin: "1em",
       }}
     >
-      <Label>AND/OR</Label>
-      (<ExprView expr={expr.lhs} />) {expr.op} (<ExprView expr={expr.rhs} />)
+      <Label>{props.label}</Label>
+      {props.children}
     </div>
   );
 }
